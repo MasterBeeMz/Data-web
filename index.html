@@ -3,163 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>สินค้า | API Dashboard</title>
+  <title>COVID-19 Dashboard | ข้อมูลโควิดทั่วโลก</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.highcharts.com/highcharts.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    /* ฟอนต์หลักและ transition */
     body {
       font-family: 'Prompt', sans-serif;
       transition: background-color 0.4s ease, color 0.4s ease;
-      background-color: #f9fafb; /* Tailwind bg-gray-50 */
-      color: #1f2937; /* Tailwind text-gray-800 */
+      background-color: #f9fafb;
+      color: #1f2937;
     }
     .dark body {
-      background-color: #1a202c; /* Tailwind gray-900 */
-      color: #e2e8f0; /* Tailwind gray-200 */
+      background-color: #1a202c;
+      color: #e2e8f0;
     }
-
-    /* Card styles */
     .card {
       background-color: #fff;
-      border-radius: 0.5rem;
-      box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
-      transition: box-shadow 0.3s ease, transform 0.2s ease;
-      cursor: pointer;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 10px rgb(0 0 0 / 0.08);
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      cursor: default;
       display: flex;
       gap: 1rem;
-      padding: 1rem;
+      padding: 1.25rem;
       align-items: center;
+      user-select: none;
     }
     .card:hover {
-      box-shadow: 0 8px 20px rgb(59 130 246 / 0.3);
-      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgb(59 130 246 / 0.25);
+      transform: translateY(-4px);
     }
     .dark .card {
-      background-color: #2d3748; /* Tailwind gray-800 */
-      box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+      background-color: #2d3748;
+      box-shadow: 0 4px 12px rgb(0 0 0 / 0.4);
     }
     .dark .card:hover {
-      box-shadow: 0 8px 20px rgb(59 130 246 / 0.7);
+      box-shadow: 0 8px 25px rgb(59 130 246 / 0.65);
     }
-
-    /* รูปสินค้า */
-    .product-image {
-      width: 5rem;  /* 80px */
-      height: 5rem;
-      object-fit: contain;
+    .flag {
+      width: 5rem;
+      height: 3rem;
+      object-fit: cover;
       flex-shrink: 0;
+      border-radius: 0.375rem;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+      transition: transform 0.3s ease;
     }
-
-    /* ชื่อสินค้า */
-    .product-title {
-      font-weight: 600;
-      font-size: 1rem;
-      line-height: 1.3;
-      margin-bottom: 0.25rem;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2; /* ตัดคำ 2 บรรทัด */
-      -webkit-box-orient: vertical;
+    .card:hover .flag {
+      transform: scale(1.05);
     }
-
-    /* หมวดหมู่ */
-    .product-category {
-      font-size: 0.875rem;
-      color: #6b7280; /* Tailwind gray-500 */
-      text-transform: capitalize;
-      margin-bottom: 0.5rem;
-    }
-    .dark .product-category {
-      color: #a0aec0; /* Tailwind gray-400 */
-    }
-
-    /* ราคาสินค้า */
-    .product-price {
+    .country-name {
       font-weight: 700;
       font-size: 1.125rem;
-      color: #2563eb; /* Tailwind blue-600 */
+      line-height: 1.3;
+      margin-bottom: 0.25rem;
+      overflow-wrap: break-word;
     }
-    .dark .product-price {
-      color: #63b3ed; /* Tailwind blue-400 */
+    .stats {
+      font-size: 0.875rem;
+      color: #6b7280;
+      line-height: 1.4;
     }
-
-    /* ปุ่ม */
+    .dark .stats {
+      color: #a0aec0;
+    }
+    .stat-value {
+      font-weight: 700;
+      color: #2563eb;
+    }
+    .stat-value.deaths {
+      color: #ef4444;
+    }
+    .stat-value.recovered {
+      color: #10b981;
+    }
     button {
       font-weight: 600;
       user-select: none;
+      transition: background-color 0.3s ease;
     }
     button:focus {
       outline: none;
       box-shadow: 0 0 0 3px rgb(59 130 246 / 0.5);
     }
-
-    /* Input */
     input[type="text"] {
       font-size: 1rem;
-      border-radius: 0.375rem;
-      border: 1px solid #d1d5db; /* Tailwind gray-300 */
+      border-radius: 0.5rem;
+      border: 1px solid #d1d5db;
       padding: 0.75rem 1rem;
       width: 100%;
+      max-width: 480px;
       transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
     }
     input[type="text"]:focus {
-      border-color: #3b82f6; /* Tailwind blue-500 */
-      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.3);
+      border-color: #3b82f6;
+      box-shadow: 0 0 6px rgb(59 130 246 / 0.5);
       outline: none;
     }
     .dark input[type="text"] {
-      background-color: #1a202c; /* Tailwind gray-900 */
-      border-color: #4a5568; /* Tailwind gray-600 */
+      background-color: #1a202c;
+      border-color: #4a5568;
       color: #e2e8f0;
+      box-shadow: none;
     }
     .dark input[type="text"]::placeholder {
-      color: #a0aec0; /* Tailwind gray-400 */
+      color: #718096;
     }
     .dark input[type="text"]:focus {
-      border-color: #60a5fa; /* Tailwind blue-400 */
-      box-shadow: 0 0 0 3px rgb(96 165 250 / 0.5);
+      border-color: #60a5fa;
+      box-shadow: 0 0 8px rgb(96 165 250 / 0.7);
     }
-
-    /* Responsive Grid/List */
-    #productList.grid {
+    #countryList.grid {
       display: grid;
       grid-template-columns: repeat(1, minmax(0, 1fr));
-      gap: 1rem;
+      gap: 1.25rem;
     }
     @media (min-width: 640px) {
-      #productList.grid {
+      #countryList.grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
     @media (min-width: 768px) {
-      #productList.grid {
+      #countryList.grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
     @media (min-width: 1024px) {
-      #productList.grid {
+      #countryList.grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
       }
     }
-
-    #productList.list {
+    #countryList.list {
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
-    #productList.list .card {
+    #countryList.list .card {
       flex-direction: row;
+      text-align: left;
     }
-    #productList.grid .card {
+    #countryList.grid .card {
       flex-direction: column;
       align-items: center;
       text-align: center;
     }
-    #productList.list .product-image {
+    #countryList.list .flag {
       width: 4rem;
-      height: 4rem;
+      height: 2.4rem;
+    }
+    #loading {
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #3b82f6;
+      padding: 3rem 0;
+      user-select: none;
+    }
+    .dark #loading {
+      color: #60a5fa;
     }
   </style>
 </head>
@@ -167,147 +170,175 @@
 
   <div class="max-w-7xl mx-auto px-4 py-8">
     <header class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-      <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400 select-none">🛍 สินค้า API Dashboard</h1>
+      <h1 class="text-3xl font-bold text-blue-700 dark:text-blue-400 select-none">🦠 COVID-19 Dashboard</h1>
       <div class="flex gap-4">
-        <button id="toggleDark" class="bg-gray-200 dark:bg-gray-700 rounded-md px-4 py-2 shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+        <button id="toggleDark" class="bg-gray-200 dark:bg-gray-700 rounded-md px-5 py-2 shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
           🌙 โหมดมืด
         </button>
-        <button id="toggleView" class="bg-blue-100 text-blue-700 dark:bg-blue-600 dark:text-blue-100 rounded-md px-4 py-2 shadow hover:bg-blue-200 dark:hover:bg-blue-500 transition">
+        <button id="toggleView" class="bg-blue-100 text-blue-700 dark:bg-blue-600 dark:text-blue-100 rounded-md px-5 py-2 shadow hover:bg-blue-200 dark:hover:bg-blue-500 transition">
           🔁 สลับมุมมอง
         </button>
       </div>
     </header>
 
-    <div class="mb-6">
+    <div class="mb-8 flex justify-center">
       <input
         id="searchInput"
         type="text"
-        placeholder="🔍 ค้นหาสินค้า..."
+        placeholder="🔍 ค้นหาประเทศ..."
         autocomplete="off"
+        aria-label="ค้นหาประเทศ"
       />
     </div>
 
     <section
       id="chartContainer"
-      class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-10 min-h-[280px]"
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-12 min-h-[300px]"
+      aria-label="กราฟแสดงสถานะ COVID-19 ทั่วโลก"
     ></section>
 
-    <section id="productList" class="grid"></section>
+    <section id="countryList" class="grid" aria-live="polite" aria-relevant="additions"></section>
+
+    <div id="loading">กำลังโหลดข้อมูล...</div>
   </div>
 
   <script>
-    let products = [];
-    let gridMode = true;
+    (() => {
+      let countries = [];
+      let gridMode = true;
 
-    const productList = document.getElementById('productList');
-    const toggleDarkBtn = document.getElementById('toggleDark');
-    const toggleViewBtn = document.getElementById('toggleView');
-    const searchInput = document.getElementById('searchInput');
+      const countryList = document.getElementById('countryList');
+      const toggleDarkBtn = document.getElementById('toggleDark');
+      const toggleViewBtn = document.getElementById('toggleView');
+      const searchInput = document.getElementById('searchInput');
+      const loading = document.getElementById('loading');
 
-    toggleDarkBtn.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark');
-    });
+      // สลับโหมดมืด
+      toggleDarkBtn.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+      });
 
-    toggleViewBtn.addEventListener('click', () => {
-      gridMode = !gridMode;
-      renderProducts(products);
-    });
+      // สลับมุมมอง Grid / List
+      toggleViewBtn.addEventListener('click', () => {
+        gridMode = !gridMode;
+        renderCountries(getFilteredCountries());
+      });
 
-    searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.trim().toLowerCase();
-      const filtered = products.filter(
-        (p) =>
-          p.title.toLowerCase().includes(query) ||
-          p.category.toLowerCase().includes(query)
-      );
-      renderProducts(filtered);
-    });
+      // ค้นหาประเทศ
+      searchInput.addEventListener('input', () => {
+        renderCountries(getFilteredCountries());
+      });
 
-    function renderProducts(data) {
-      if (gridMode) {
-        productList.classList.add('grid');
-        productList.classList.remove('list');
-      } else {
-        productList.classList.add('list');
-        productList.classList.remove('grid');
+      // กรองประเทศตามคำค้น
+      function getFilteredCountries() {
+        const q = searchInput.value.trim().toLowerCase();
+        return countries.filter(c =>
+          c.country.toLowerCase().includes(q) ||
+          (c.countryInfo.iso2 && c.countryInfo.iso2.toLowerCase().includes(q))
+        );
       }
 
-      productList.innerHTML = data
-        .map((p) => {
-          return `
-          <article class="card">
-            <img src="${p.image}" alt="${p.title}" class="product-image" />
-            <div class="product-info">
-              <h3 class="product-title">${p.title}</h3>
-              <p class="product-category">${p.category}</p>
-              <p class="product-price">$${p.price.toFixed(2)}</p>
+      // สร้าง HTML แสดงข้อมูลประเทศ
+      function renderCountries(data) {
+        if (gridMode) {
+          countryList.classList.add('grid');
+          countryList.classList.remove('list');
+        } else {
+          countryList.classList.add('list');
+          countryList.classList.remove('grid');
+        }
+
+        if (data.length === 0) {
+          countryList.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 select-none">ไม่พบข้อมูลประเทศที่ค้นหา</p>`;
+          return;
+        }
+
+        countryList.innerHTML = data.map(c => `
+          <article class="card" title="${c.country}">
+            <img src="${c.countryInfo.flag}" alt="ธงชาติ ${c.country}" class="flag" loading="lazy" />
+            <div class="country-info">
+              <h3 class="country-name">${c.country}</h3>
+              <p class="stats">
+                ผู้ติดเชื้อ: <span class="stat-value">${c.cases.toLocaleString()}</span><br/>
+                ผู้เสียชีวิต: <span class="stat-value deaths">${c.deaths.toLocaleString()}</span><br/>
+                รักษาหาย: <span class="stat-value recovered">${c.recovered.toLocaleString()}</span>
+              </p>
             </div>
           </article>
-        `;
-        })
-        .join('');
-    }
+        `).join('');
+      }
 
-    function renderChart(products) {
-      const catTotals = {};
-      products.forEach((p) => {
-        catTotals[p.category] = (catTotals[p.category] || 0) + p.price;
-      });
+      // สร้างกราฟวงกลม
+      function renderChart(data) {
+        const totalCases = data.reduce((sum, c) => sum + c.cases, 0);
+        const totalDeaths = data.reduce((sum, c) => sum + c.deaths, 0);
+        const totalRecovered = data.reduce((sum, c) => sum + c.recovered, 0);
 
-      Highcharts.chart('chartContainer', {
-        chart: {
-          type: 'column',
-          backgroundColor: 'transparent',
-        },
-        title: {
-          text: 'ยอดขายตามหมวดหมู่',
-          style: {
-            color: getComputedStyle(document.body).color,
+        Highcharts.chart('chartContainer', {
+          chart: {
+            type: 'pie',
+            backgroundColor: 'transparent',
           },
-        },
-        xAxis: {
-          categories: Object.keys(catTotals),
-          labels: {
-            style: {
-              color: getComputedStyle(document.body).color,
-            },
-          },
-          lineColor: getComputedStyle(document.body).color,
-          tickColor: getComputedStyle(document.body).color,
-        },
-        yAxis: {
           title: {
-            text: 'ยอดขายรวม ($)',
-            style: {
-              color: getComputedStyle(document.body).color,
+            text: 'สถานะ COVID-19 ทั่วโลก',
+            style: { color: getComputedStyle(document.body).color },
+          },
+          tooltip: {
+            pointFormat: '{series.name}: <b>{point.y:,0f}</b>',
+          },
+          accessibility: { point: { valueSuffix: '%' } },
+          plotOptions: {
+            pie: {
+              allowPointSelect: true,
+              cursor: 'pointer',
+              dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                color: getComputedStyle(document.body).color,
+                connectorColor: getComputedStyle(document.body).color,
+              },
             },
           },
-          labels: {
-            style: {
-              color: getComputedStyle(document.body).color,
-            },
-          },
-          gridLineColor: 'rgba(200, 200, 200, 0.1)',
-        },
-        series: [
-          {
-            name: 'ยอดขาย',
-            data: Object.values(catTotals),
-            color: '#3B82F6',
-          },
-        ],
-        credits: { enabled: false },
-      });
-    }
+          series: [{
+            name: 'จำนวน',
+            colorByPoint: true,
+            data: [
+              { name: 'ผู้ติดเชื้อ', y: totalCases, color: '#3B82F6' },
+              { name: 'ผู้เสียชีวิต', y: totalDeaths, color: '#EF4444' },
+              { name: 'รักษาหาย', y: totalRecovered, color: '#10B981' },
+            ],
+          }],
+          credits: { enabled: false },
+        });
+      }
 
-    // Fetch products and initialize page
-    fetch('https://fakestoreapi.com/products')
-      .then((res) => res.json())
-      .then((data) => {
-        products = data;
-        renderProducts(products);
-        renderChart(products);
-      });
+      // โหลดข้อมูลจาก API และแสดงผล
+      function loadData() {
+        loading.style.display = 'block';
+        countryList.innerHTML = '';
+        fetch('https://disease.sh/v3/covid-19/countries')
+          .then(res => {
+            if (!res.ok) throw new Error('ไม่สามารถโหลดข้อมูลได้');
+            return res.json();
+          })
+          .then(data => {
+            countries = data;
+            renderCountries(countries);
+            renderChart(countries);
+          })
+          .catch(err => {
+            countryList.innerHTML = `<p class="text-red-600 dark:text-red-400 text-center font-semibold">เกิดข้อผิดพลาดในการโหลดข้อมูล</p>`;
+            console.error(err);
+          })
+          .finally(() => {
+            loading.style.display = 'none';
+          });
+      }
+
+      // เริ่มโหลดข้อมูล
+      loadData();
+    })();
   </script>
+
 </body>
 </html>
